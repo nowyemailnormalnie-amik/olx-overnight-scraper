@@ -1,0 +1,57 @@
+name: OLX Overnight Scraper
+
+# Uruchamia się automatycznie co 6h + możliwość ręcznego uruchomienia
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Co 6 godzin (00:00, 06:00, 12:00, 18:00 UTC)
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: 'Ile godzin ma działać (max 5.5h z powodu limitu GitHub)'
+        required: true
+        default: '5'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # Max 6h dla GitHub Actions
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Run overnight scraper
+      run: |
+        # Jeśli manual run - użyj podanej wartości, jeśli cron - użyj 5.5h
+        HOURS="${{ github.event.inputs.hours }}"
+        if [ -z "$HOURS" ]; then
+          HOURS="5.5"
+        fi
+        echo "$HOURS" | python overnight_scraper.py
+        
+    - name: Upload results
+      uses: actions/upload-artifact@v3
+      if: always()  # Nawet jeśli skrypt się wysypie, zapisz co zdążył
+      with:
+        name: scraping-results
+        path: |
+          overnight_checkpoint.csv
+          overnight_checkpoint_cache.json
+          overnight_checkpoint_stats.json
+        retention-days: 30
+        
+    - name: Commit and push results (jeśli są zmiany)
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add overnight_checkpoint*.csv overnight_checkpoint*.json || true
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update scraping results [skip ci]" && git push)
