@@ -39,7 +39,7 @@ jobs:
         echo "$HOURS" | python overnight_scraper.py
         
     - name: Upload results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()  # Nawet jeśli skrypt się wysypie, zapisz co zdążył
       with:
         name: scraping-results
