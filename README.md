@@ -79,3 +79,42 @@ Skrypt automatycznie wczytuje poprzednie wyniki i pomija już sprawdzonych użyt
 - 0.2s opóźnienie między requestami
 - Random selection unika wzorców
 - Jeden request per profil użytkownika
+
+---
+
+## 📦 Folder `istotne_skrypty` - Narzędzia pomocnicze
+
+Po zebraniu firm za pomocą overnight_scraper, użyj narzędzi z folderu `istotne_skrypty` do dalszej pracy:
+
+### 📧 extract_emails.py
+**Wyciąga emaile z profili OLX znalezionych przez scraper**
+- **Input**: `overnight_checkpoint.csv` (ranking firm)
+- **Output**: CSV z emailami firm
+- **Czas**: ~0.5s na firmę
+- **Zależności**: requests, beautifulsoup4
+
+### 🏢 scrape_baselinker.py
+**Zbiera emaile hurtowników z BaseLinker.pl (alternatywne źródło kontaktów)**
+- **Input**: Brak (scrape'uje stronę BaseLinker)
+- **Output**: `baselinker_emails_[timestamp].csv`
+- **Status**: ✅ Już zebrane 20 emaili w `baselinker_emails.csv`
+
+### 📩 EMAIL_GOTOWY_AMADEUSZ.txt
+**Szablon cold emaila RODO-compliant do kampanii B2B**
+- Profesjonalny subject + value proposition (AI kategoryzator OLX)
+- RODO-compliant footer (opt-out, dane firmy)
+- Personalizacja: {IMIE}, {NAZWA_FIRMY}
+
+### 📊 baselinker_emails.csv
+**Gotowa baza 20 emaili hurtowników z BaseLinker.pl**
+- Format: ID, Nazwa, Email, Źródło
+- Status: ✅ Kompletne, gotowe do kampanii
+
+### 🔄 Workflow (Kompletny proces)
+1. **Znajdź firmy**: Uruchom `overnight_scraper.py` (działa automatycznie w GitHub Actions)
+2. **Wyciągnij emaile**: `python extract_emails.py` → CSV z emailami firm OLX
+3. **Backup**: Użyj `baselinker_emails.csv` (20 gotowych kontaktów)
+4. **Kampania**: Skopiuj tekst z `EMAIL_GOTOWY_AMADEUSZ.txt`
+5. **Wyślij**: Import CSV do systemu mailingowego
+
+---
